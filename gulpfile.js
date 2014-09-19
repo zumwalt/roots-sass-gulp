@@ -10,42 +10,59 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     notify = require('gulp-notify'),
     cache = require('gulp-cache'),
+    rev = require('gulp-rev'),
     del = require('del'),
+    modernizr = require('gulp-modernizr'),
     browserSync = require('browser-sync'),
     reload = browserSync.reload;
 
 // Set the address of your local WordPress installation.
 var localhost = "yourlocal.dev";
 
+// Destinations
+var destination = {
+  css: 'assets/css',
+  scripts: 'assets/js',
+  images: 'assets/img',
+  modernizr: 'assets/vendor/modernizr',
+  vendor: 'assets/js/vendor'
+};
+
+// Paths
+var paths = {
+  scripts: [
+    'assets/js/_main.js' // Primary script
+  ],
+  scss: [
+    'assets/scss/main.scss'
+  ]
+};
+
 // Styles
 gulp.task('styles', function() {
-  return gulp.src('assets/scss/main.scss')
+  return gulp.src(paths.scss)
     .pipe(sass({ style: 'expanded', }))
     .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))
-    .pipe(gulp.dest('assets/css'))
+    .pipe(gulp.dest(destination.css))
     .pipe(rename({ suffix: '.min' }))
     .pipe(minifycss())
-    .pipe(gulp.dest('assets/css'))
+    .pipe(gulp.dest(destination.css))
     .pipe(reload({stream:true}))
     .pipe(notify({ message: 'Styles task complete' }));
 });
 
 // Scripts
 
-// Load bower scripts, plugins, etc.
-var jsFileList = [
-  'assets/js/_main.js' // Primary script
-];
 
 gulp.task('scripts', function() {
-  return gulp.src(jsFileList)
+  return gulp.src(paths.scripts)
     .pipe(jshint('.jshintrc'))
     .pipe(jshint.reporter('default'))
     .pipe(concat('scripts.js'))
-    .pipe(gulp.dest('assets/js'))
+    .pipe(gulp.dest(destination.scripts))
     .pipe(rename({ suffix: '.min' }))
     .pipe(uglify())
-    .pipe(gulp.dest('assets/js'))
+    .pipe(gulp.dest(destination.scripts))
     .pipe(notify({ message: 'Scripts task complete' }));
 });
 
@@ -53,8 +70,30 @@ gulp.task('scripts', function() {
 gulp.task('images', function() {
   return gulp.src('assets/img/**/*')
     .pipe(cache(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
-    .pipe(gulp.dest('assets/img'))
+    .pipe(gulp.dest(destination.images))
     .pipe(notify({ message: 'Images task complete' }));
+});
+
+// Modernizr
+gulp.task('modernizr', function() {
+  return gulp.src(
+    ['assets/js/scripts.min.js'],
+    ['assets/css/main.min.css']
+  )
+    .pipe(modernizr())
+    .pipe(gulp.dest(destination.modernizr))
+    .pipe(uglify())
+    .pipe(rename('./modernizr.min.js'))
+    .pipe(gulp.dest(destination.vendor));
+});
+
+// Versioning
+gulp.task('version', function() {
+  return gulp.src(['assets/css/main.min.css', 'assets/js/scripts.min.js'], { base: 'assets' })
+    .pipe(rev())
+    .pipe(gulp.dest('assets'))
+    .pipe(rev.manifest())
+    .pipe(gulp.dest('assets'));
 });
 
 // Clean
@@ -71,7 +110,7 @@ gulp.task('browser-sync', function() {
 
 // Default task
 gulp.task('default', ['clean'], function() {
-    gulp.start('styles', 'scripts', 'images');
+    gulp.start('styles', 'scripts', 'images', 'modernizr');
 });
 
 // Watch
@@ -90,3 +129,6 @@ gulp.task('watch', ['browser-sync'], function() {
   gulp.watch(['assets/**']).on('change', browserSync.reload);
 
 });
+
+// Build task
+gulp.task('build', ['styles', 'scripts', 'images', 'modernizr', 'version']);
