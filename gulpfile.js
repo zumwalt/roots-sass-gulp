@@ -26,11 +26,15 @@ gulp.task('styles', function() {
 });
 
 // Scripts
+var jsFileList = [
+  'assets/js/_main.js'
+];
+
 gulp.task('scripts', function() {
-  return gulp.src('assets/js/**/*.js')
+  return gulp.src(jsFileList)
     .pipe(jshint('.jshintrc'))
     .pipe(jshint.reporter('default'))
-    .pipe(concat('main.js'))
+    .pipe(concat('scripts.js'))
     .pipe(gulp.dest('assets/js'))
     .pipe(rename({ suffix: '.min' }))
     .pipe(uglify())
