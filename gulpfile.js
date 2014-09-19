@@ -103,4 +103,7 @@ gulp.task('watch', ['browser-sync'], function() {
   // Watch any files in assets/, reload on change
   gulp.watch(['assets/**']).on('change', browserSync.reload);
 
+  // Watch theme php files for changes
+  gulp.watch(['**/*.php']).on('change', browserSync.reload);
+
 });
