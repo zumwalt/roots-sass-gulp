@@ -26,8 +26,10 @@ gulp.task('styles', function() {
 });
 
 // Scripts
+
+// Load bower scripts, plugins, etc.
 var jsFileList = [
-  'assets/js/_main.js'
+  'assets/js/_main.js' // Primary script
 ];
 
 gulp.task('scripts', function() {
