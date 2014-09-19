@@ -10,8 +10,12 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     notify = require('gulp-notify'),
     cache = require('gulp-cache'),
-    livereload = require('gulp-livereload'),
-    del = require('del');
+    del = require('del'),
+    browserSync = require('browser-sync'),
+    reload = browserSync.reload;
+
+// Set the address of your local WordPress installation.
+var localhost = "yourlocal.dev";
 
 // Styles
 gulp.task('styles', function() {
@@ -22,6 +26,7 @@ gulp.task('styles', function() {
     .pipe(rename({ suffix: '.min' }))
     .pipe(minifycss())
     .pipe(gulp.dest('assets/css'))
+    .pipe(reload({stream:true}))
     .pipe(notify({ message: 'Styles task complete' }));
 });
 
@@ -57,13 +62,20 @@ gulp.task('clean', function(cb) {
     del(['assets/css/*.min.css', 'assets/js/*.min.js'], cb)
 });
 
+// Browser Sync
+gulp.task('browser-sync', function() {
+    browserSync({
+        proxy: localhost
+    });
+});
+
 // Default task
 gulp.task('default', ['clean'], function() {
     gulp.start('styles', 'scripts', 'images');
 });
 
 // Watch
-gulp.task('watch', function() {
+gulp.task('watch', ['browser-sync'], function() {
 
   // Watch .scss files
   gulp.watch('assets/scss/**/*.scss', ['styles']);
@@ -73,9 +85,6 @@ gulp.task('watch', function() {
 
   // Watch image files
   gulp.watch('assets/img/**/*', ['images']);
-
-  // Create LiveReload server
-  livereload.listen();
 
   // Watch any files in assets/, reload on change
   gulp.watch(['assets/**']).on('change', livereload.changed);
