@@ -10,9 +10,7 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     notify = require('gulp-notify'),
     cache = require('gulp-cache'),
-    rev = require('gulp-rev'),
     del = require('del'),
-    modernizr = require('gulp-modernizr'),
     browserSync = require('browser-sync'),
     reload = browserSync.reload;
 
@@ -53,7 +51,6 @@ gulp.task('styles', function() {
 
 // Scripts
 
-
 gulp.task('scripts', function() {
   return gulp.src(paths.scripts)
     .pipe(jshint('.jshintrc'))
@@ -74,28 +71,6 @@ gulp.task('images', function() {
     .pipe(notify({ message: 'Images task complete' }));
 });
 
-// Modernizr
-gulp.task('modernizr', function() {
-  return gulp.src(
-    ['assets/js/scripts.min.js'],
-    ['assets/css/main.min.css']
-  )
-    .pipe(modernizr())
-    .pipe(gulp.dest(destination.modernizr))
-    .pipe(uglify())
-    .pipe(rename('./modernizr.min.js'))
-    .pipe(gulp.dest(destination.vendor));
-});
-
-// Versioning
-gulp.task('version', function() {
-  return gulp.src(['assets/css/main.min.css', 'assets/js/scripts.min.js'], { base: 'assets' })
-    .pipe(rev())
-    .pipe(gulp.dest('assets'))
-    .pipe(rev.manifest())
-    .pipe(gulp.dest('assets'));
-});
-
 // Clean
 gulp.task('clean', function(cb) {
     del(['assets/css/*.min.css', 'assets/js/*.min.js'], cb)
@@ -110,7 +85,7 @@ gulp.task('browser-sync', function() {
 
 // Default task
 gulp.task('default', ['clean'], function() {
-    gulp.start('styles', 'scripts', 'images', 'modernizr');
+    gulp.start('styles', 'scripts', 'images');
 });
 
 // Watch
@@ -129,6 +104,3 @@ gulp.task('watch', ['browser-sync'], function() {
   gulp.watch(['assets/**']).on('change', browserSync.reload);
 
 });
-
-// Build task
-gulp.task('build', ['styles', 'scripts', 'images', 'modernizr', 'version']);
