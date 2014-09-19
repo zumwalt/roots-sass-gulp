@@ -87,6 +87,6 @@ gulp.task('watch', ['browser-sync'], function() {
   gulp.watch('assets/img/**/*', ['images']);
 
   // Watch any files in assets/, reload on change
-  gulp.watch(['assets/**']).on('change', livereload.changed);
+  gulp.watch(['assets/**']).on('change', browserSync.reload);
 
 });
