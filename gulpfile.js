@@ -31,6 +31,13 @@ var paths = {
   scripts: [
     'assets/js/_main.js' // Primary script
   ],
+  jshint: [
+    'gulpfile.js',
+    'assets/js/*.js',
+    '!assets/js/scripts.js',
+    '!assets/js/scripts.min.js',
+    '!assets/**/*.min-*'
+  ],
   scss: [
     'assets/scss/main.scss'
   ]
@@ -51,14 +58,18 @@ gulp.task('styles', function() {
 
 // Scripts
 
-gulp.task('scripts', function() {
+gulp.task('jshint', function() {
+  return gulp.src(paths.jshint)
+    .pipe(jshint())
+    .pipe(jshint.reporter(stylish));
+});
+
+gulp.task('scripts', ['jshint'], function() {
   return gulp.src(paths.scripts)
-    .pipe(jshint('.jshintrc'))
-    .pipe(jshint.reporter('default'))
     .pipe(concat('scripts.js'))
     .pipe(gulp.dest(destination.scripts))
-    .pipe(rename({ suffix: '.min' }))
     .pipe(uglify())
+    .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest(destination.scripts))
     .pipe(notify({ message: 'Scripts task complete' }));
 });
